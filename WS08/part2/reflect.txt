@@ -1,0 +1,36 @@
+In this workshop, I have learned several important concepts related to C++ template programming, singleton design patterns, and proper resource management. Here are the details of my reflection:
+
+Use of unique_ptr: We could not use a unique_ptr in the Database class because unique_ptr does not allow sharing ownership. In a singleton pattern, multiple parts of the program need to access the same instance. Therefore, shared_ptr is used to ensure that the single instance can be shared safely.
+
+Transforming to a Templated Class: To transform the Database class into a templated one, I added a template parameter T to the class definition and its member functions. This change required modifying member variables and functions to be type-dependent. For example, the encryptDecrypt function needed specialization for different types.
+
+Singleton without Static Members: Another way to create a singleton without using static members is to use a static local variable within a static member function. For example:
+
+template <typename T>
+class Database {
+public:
+    static std::shared_ptr<Database<T>> getInstance(const std::string& filename) {
+        static std::shared_ptr<Database<T>> instance(new Database<T>(filename));
+        return instance;
+    }
+private:
+    Database(const std::string& filename);
+};
+This ensures that the instance is created only once and managed locally within the function scope.
+
+Resource Management: The Database class has a resource attribute (the database instance), but no copy/move operations were implemented. This is not necessarily a bug if the class is intended to be non-copyable and non-movable. By not defining these operations, the default behavior (which is to delete them) prevents unintended copying or moving of the singleton instance.
+
+Constructor Called Twice: Although the Database class is intended to be instantiated only once, the custom constructor is called twice, and the same for the destructor. This might be due to improper management of the static pointer, or it might be because of how the program is being executed in a test environment where the instance is being created and destroyed more than once for validation purposes.
+
+Here is an example from my solution to illustrate these points:
+
+template <typename T>
+std::shared_ptr<Database<T>> Database<T>::getInstance(const std::string &filename) {
+    if (m_ptr != nullptr) {
+        return m_ptr;
+    } else {
+        m_ptr = std::shared_ptr<Database<T>>(new Database<T>(filename));
+        return m_ptr;
+    }
+}
+In conclusion, this workshop has deepened my understanding of templates, singletons, and resource management in C++. The challenges encountered, particularly with type management in templated functions and ensuring proper singleton behavior, have provided valuable learning experiences.
